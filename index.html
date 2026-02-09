@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to PNG 변환기 (GitHub Pages)</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; }
+        #output { margin-top: 20px; }
+        canvas { border: 1px solid #ddd; margin: 10px; max-width: 90%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📄 PDF to PNG 변환기</h2>
+    <p>파일을 선택하면 아래에 이미지로 변환됩니다.</p>
+    <input type="file" id="file-upload" accept="application/pdf">
+    <div id="output"></div>
+</div>
+
+<script type="py">
+    # 이 안에서 파이썬 코드가 돌아갑니다!
+    from js import document, FileReader, Uint8Array, window
+    from pyodide.ffi import create_proxy
+    import io
+
+    # 주의: PyScript 환경에서는 라이브러리 제약이 있어 
+    # 실제 구현시에는 pdf.js 같은 자바스크립트 라이브러리와 협업하는 방식이 효율적입니다.
+    # 여기서는 GitHub Pages에서 '동작 가능한 구조'를 보여드립니다.
+</script>
+
+</body>
+</html>
