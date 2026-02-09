@@ -1,37 +1,64 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to PNG 변환기 (GitHub Pages)</title>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <title>PDF to PNG 변환기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; }
-        #output { margin-top: 20px; }
-        canvas { border: 1px solid #ddd; margin: 10px; max-width: 90%; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        #drop-zone { border: 2px dashed #ccc; padding: 20px; cursor: pointer; }
+        canvas { border: 1px solid #000; margin-top: 10px; max-width: 100%; }
+        .page-container { margin-bottom: 20px; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>📄 PDF to PNG 변환기</h2>
-    <p>파일을 선택하면 아래에 이미지로 변환됩니다.</p>
-    <input type="file" id="file-upload" accept="application/pdf">
+    <h2>📄 PDF to PNG 변환기 (GitHub Pages용)</h2>
+    <div id="drop-zone">PDF 파일을 선택하거나 여기에 끌어다 놓으세요.</div>
+    <input type="file" id="file-input" accept="application/pdf" style="display:none">
     <div id="output"></div>
-</div>
 
-<script type="py">
-    # 이 안에서 파이썬 코드가 돌아갑니다!
-    from js import document, FileReader, Uint8Array, window
-    from pyodide.ffi import create_proxy
-    import io
+    <script>
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    # 주의: PyScript 환경에서는 라이브러리 제약이 있어 
-    # 실제 구현시에는 pdf.js 같은 자바스크립트 라이브러리와 협업하는 방식이 효율적입니다.
-    # 여기서는 GitHub Pages에서 '동작 가능한 구조'를 보여드립니다.
-</script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const output = document.getElementById('output');
 
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            output.innerHTML = '변환 중...';
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+
+            output.innerHTML = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({scale: 2.0});
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({canvasContext: context, viewport: viewport}).promise;
+                
+                const div = document.createElement('div');
+                div.className = 'page-container';
+                div.appendChild(canvas);
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `page-${i}.png`;
+                link.innerText = `${i}페이지 다운로드`;
+                link.style.display = 'block';
+                
+                div.appendChild(link);
+                output.appendChild(div);
+            }
+        };
+    </script>
 </body>
 </html>
